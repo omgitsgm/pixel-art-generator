@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: RGB(40, 42, 54);
+        }
+        
+        #header-title {
+            color: RGB(248, 248, 242);
+        }
+
+        #explanation {
+            font-size: 40;
+        }
+
+        #jumbo {
+            border-color: blueviolet;
+            border-width: 5px;
+        }
+
+    </style>
+</head>
+  <body>
+    <div class="container">
+      <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+        <a href="index.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+          <img class="bi me-2" src="{{ url_for('static', filename='images/pixel_art_wizard.png') }}" width="60px" alt="Um mago com chapéu roxo e barba branca.">
+          <span class="fs-4" id="header-title">Pixel Art Generator</span>
+        </a>
+      </header>
+  </div>
+    
+    <div class="container text-center rounded-3" id="jumbo">
+        <h1 class="text-white">We generated two versions of pixel art for you <3</h1>
+
+        <div class="container p-5">
+            <img src="{{ nni_url }}" width="400" alt="The first generated pixel art with Nearest Neighbor Interpolation. It can be anything!">
+            <img src="{{ bi_url }}" width="400" alt="The secod generated pixel art with Bilinear Interpolation. It can be anything!">
+        </div>
+
+        <p class="col-lg-8 mx-auto fs-5 text-muted lead pb-4" id="explanation">
+            <small class="text-white">
+                We use two different algorithms to generate the pixel arts and they usually get different results converting a normal image into a pixel art. That's why you have two download options. Download the one you like the most or both, you choose :)
+            </small>
+        </p>
+
+        <div class="d-inline-flex gap-2 mb-5">
+          <!-- <button class="d-inline-flex align-items-center btn btn-light btn-lg px-4 rounded-pill" type="button">
+            Download the left one
+          </button>
+          <button class="d-inline-flex align-items-center btn btn-light btn-lg px-4 rounded-pill" type="button">
+            Download the right one
+          </button> -->
+          <a href="{{ nni_url }}" class="d-inline-flex align-items-center btn btn-light btn-lg px-4 rounded-pill" download>
+            Download the left one
+          </a>
+    
+          <!-- Botão para download da BI file -->
+          <a href="{{ bi_url }}" class="d-inline-flex align-items-center btn btn-light btn-lg px-4 rounded-pill" download>
+              Download the right one
+          </a>
+
+        </div>
+      </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+  </body>
+</html>
