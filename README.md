@@ -42,6 +42,10 @@ Para a diminuição da paleta de cores da aplicação nós utilizamos um algorit
 
 ### Como executar?
 
+#### Usando o executável do Windows
+
+Você pode executar o projeto no Windows simplesmente executando o arquivo .exe encontrado dentro de [project/dist](https://github.com/omgitsgm/pixel-art-generator/tree/main/project/dist). Alternativamente, você pode seguir o passo-a-passo abaixo para construir e executar a aplicação localmente na sua máquina.
+
 #### Pré-requisitos
 
 * **Python 3.9+**: Certifique-se de que o Python esteja instalado em seu sistema.
