@@ -4,13 +4,21 @@ from PIL import Image
 import numpy as np
 import cv2
 import os
+import sys
 import json
 
 print("Carregando main.py...")
 
+def get_resource_path(relative_path):
+    #Retorna o caminho absoluto para um recurso, lidando com o executável.
+    if hasattr(sys, '_MEIPASS'):
+        # Executando como um executável empacotado
+        return os.path.join(sys._MEIPASS, relative_path)
+    # Executando localmente
+    return os.path.join(os.path.abspath("."), relative_path)
 
 # Pasta temporária para salvar imagens processadas
-TEMP_DIR = "temp_images"
+TEMP_DIR = get_resource_path("temp_images")
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 @app.route('/result')
