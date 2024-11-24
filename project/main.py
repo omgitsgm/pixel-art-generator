@@ -1,5 +1,5 @@
 from app import app
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, redirect, url_for, render_template
 from PIL import Image
 import numpy as np
 import cv2
@@ -8,9 +8,24 @@ import json
 
 print("Carregando main.py...")
 
+
 # Pasta temporária para salvar imagens processadas
 TEMP_DIR = "temp_images"
 os.makedirs(TEMP_DIR, exist_ok=True)
+
+@app.route('/result')
+def result():
+    nni_filename = request.args.get('nni_filename')
+    bi_filename = request.args.get('bi_filename')
+
+    return render_template(
+        'result.html',
+        nni_url = url_for('download', filename=nni_filename),
+        bi_url = url_for('download', filename=bi_filename))
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/process', methods=['POST'])
 def process():
@@ -20,16 +35,10 @@ def process():
     image_file = request.files['image']
     image = np.array(Image.open(image_file))
     
-    json_data = request.form.get('json')
-    if not json_data:
-        return jsonify({'error': 'Parâmetros JSON não enviados'}), 400
+    palette_size = request.form.get('paletteSize', type=int)
+    if not palette_size:
+        return jsonify({'error': 'Tamanho da paleta não enviado'}), 400
     
-    try:
-        params = json.loads(json_data)
-    except ValueError:
-        return jsonify({'error': 'JSON inválido'}), 400
-    
-    palette_size = params.get('paletteSize')
     if palette_size is None:
         return jsonify({'error': 'Parâmetro "paletteSize" é obrigatório'}), 400
     
@@ -44,28 +53,20 @@ def process():
     
     Image.fromarray(nni_quantized).save(nni_path)
     Image.fromarray(bi_quantized).save(bi_path)
-    
-    return jsonify(
-        {
-            'nni_image_url': f'/download/{os.path.basename(nni_path)}',
-            'bi_image_url': f'/download/{os.path.basename(bi_path)}'
-        }
-    ), 200
+
+    return redirect(url_for('result', nni_filename='nni_quantized.jpg', bi_filename='bi_quantized.jpg'))
     
 @app.route('/download/<filename>', methods=['GET'])
-def download_file(filename):
+def download(filename):
     filepath = os.path.join(TEMP_DIR, filename)
     if os.path.exists(filepath):
         return send_file(filepath, mimetype='image/png')
     else:
         return jsonify({'error': 'Arquivo não encontrado'}), 404    
-    
-    
-    
-    
+       
 # Algoritmo desenvolvido para a AP2.
 # Interpolação por vizinho mais próximo.
-def nearest_neighbor_interpolation(img, scale_factor = 0.12):
+def nearest_neighbor_interpolation(img, scale_factor=0.12):
     # Obtém as dimensões da imagem original
     height, width = img.shape[:2]
 
@@ -82,12 +83,20 @@ def nearest_neighbor_interpolation(img, scale_factor = 0.12):
             orig_i = min(int(i / scale_factor), height - 1)
             orig_j = min(int(j / scale_factor), width - 1)
             resized[i, j] = img[orig_i, orig_j]
+            
+    # Retorna a imagem para o tamanho original mantendo o efeito pixelado
+    final_image = np.zeros((height, width) + img.shape[2:], dtype=img.dtype)
+    for i in range(height):
+        for j in range(width):
+            orig_i = min(int(i / (height / new_height)), new_height - 1)
+            orig_j = min(int(j / (width / new_width)), new_width - 1)
+            final_image[i, j] = resized[orig_i, orig_j]
 
-    return resized
+    return final_image
 
 # Algoritmo desenvolvido para a AP2
 # Interpolação bilinear
-def bilinear_interpolation(img, scale_factor = 0.12):
+def bilinear_interpolation(img, scale_factor=0.12):
     # Obtém as dimensões da imagem original
     height, width = img.shape[:2]
 
@@ -125,7 +134,18 @@ def bilinear_interpolation(img, scale_factor = 0.12):
         )
 
     # Converte de volta para uint8
-    return np.clip(resized, 0, 255).astype(np.uint8)    
+    resized = np.clip(resized, 0, 255).astype(np.uint8)
+    
+    # Agora redimensiona de volta para o tamanho original, mantendo o estilo pixel-art
+    final_resized = np.zeros_like(img)
+    for i in range(img.shape[0]):
+        for j in range(img.shape[1]):
+            orig_i = min(int(i / (img.shape[0] / resized.shape[0])), resized.shape[0] - 1)
+            orig_j = min(int(j / (img.shape[1] / resized.shape[1])), resized.shape[1] - 1)
+            final_resized[i, j] = resized[orig_i, orig_j]
+
+    # Retorna a imagem com efeito pixel-art
+    return final_resized  
 
 # Função para quantização da imagem
 def quantize(img, palette_size):
@@ -136,13 +156,6 @@ def quantize(img, palette_size):
                                     attempts=10, flags=cv2.KMEANS_RANDOM_CENTERS)
     centers = np.uint8(centers)
     return centers[labels.flatten()].reshape(img.shape)
-           
-
-
-@app.route('/hello', methods=['GET'])
-def hello_world():
-    print("Chegamos?")
-    return "Hello World!"
 
 if __name__ == "__main__":
     print("Iniciando servidor...")
